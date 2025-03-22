@@ -1,6 +1,5 @@
 package local_search_engine.seeker.service;
 
-import local_search_engine.seeker.model.IndexedFile;
 import local_search_engine.seeker.repository.FileRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -13,10 +12,10 @@ import java.nio.file.Path;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class FileParserService {
+public class ParserService {
 
     private final FileRepository fileRepository;
-    private final FileFilterService fileFilterService;
+    private final FilterService filterService;
 
     public String extractContent(Path filePath) throws IOException {
         String extension = getFileExtension(filePath);

@@ -1,17 +1,16 @@
 package local_search_engine.seeker.controller;
 
-import local_search_engine.seeker.service.FileCrawlerService;
-import org.springframework.beans.factory.annotation.Autowired;
+import local_search_engine.seeker.service.CrawlerService;
 import org.springframework.web.bind.annotation.*;
 import java.io.IOException;
 
 @RestController
 @RequestMapping("/crawl")
-public class FileCrawlerController {
-    private final FileCrawlerService fileCrawlerService;
+public class CrawlerController {
+    private final CrawlerService crawlerService;
 
-    public FileCrawlerController(FileCrawlerService fileCrawlerService) {
-        this.fileCrawlerService = fileCrawlerService;
+    public CrawlerController(CrawlerService crawlerService) {
+        this.crawlerService = crawlerService;
     }
 
 
@@ -19,7 +18,7 @@ public class FileCrawlerController {
     public String startCrawling() {
         String directoryPath = "C:/Users/coman/Desktop/search-engine-test";
         try {
-            fileCrawlerService.crawlDirectory(directoryPath);
+            crawlerService.crawlDirectory(directoryPath);
             return "Crawling started...";
         } catch (IOException e) {
             return "Error: " + e.getMessage();

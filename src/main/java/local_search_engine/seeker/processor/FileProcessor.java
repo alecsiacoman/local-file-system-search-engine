@@ -2,39 +2,37 @@ package local_search_engine.seeker.processor;
 
 import local_search_engine.seeker.model.IndexedFile;
 import local_search_engine.seeker.repository.FileRepository;
-import local_search_engine.seeker.service.FileFilterService;
-import local_search_engine.seeker.service.FileParserService;
+import local_search_engine.seeker.service.FilterService;
+import local_search_engine.seeker.service.ParserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
-import java.time.Instant;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.*;
 
 @Service
 @Slf4j
 public class FileProcessor {
     @Autowired
-    private FileFilterService fileFilterService;
+    private FilterService filterService;
 
     @Autowired
-    private FileParserService fileParserService;
+    private ParserService parserService;
 
     @Autowired
     private FileRepository fileRepository;
 
     public void processFiles(List<Path> files) {
         for (Path file : files) {
-            if (!fileFilterService.isValidFile(file)) {
+            if (!filterService.isValidFile(file)) {
                 continue;
             }
 
             try {
                 BasicFileAttributes attr = Files.readAttributes(file, BasicFileAttributes.class);
-                String content = fileParserService.extractContent(file);
+                String content = parserService.extractContent(file);
                 log.info("Content of file {}: {}", file.getFileName(), content);
 
                 IndexedFile indexedFile = new IndexedFile();

@@ -7,7 +7,7 @@ import java.io.IOException;
 import java.util.*;
 
 @Service
-public class FileFilterService {
+public class FilterService {
     private static final List<String> ALLOWED_EXTENSIONS = List.of("txt", "pdf", "docx");
     private static final long MAX_SIZE = 5 * 1024 * 1024;
 

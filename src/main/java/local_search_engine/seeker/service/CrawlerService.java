@@ -12,14 +12,14 @@ import org.springframework.stereotype.Service;
 
 @Service
 @Slf4j
-public class FileCrawlerService {
+public class CrawlerService {
     private static final int BATCH_SIZE = 500;
     private static final int THREAD_POOL_SIZE = 4;
 
     private final ExecutorService executor = Executors.newFixedThreadPool(THREAD_POOL_SIZE);
     private final FileProcessor fileProcessor;
 
-    public FileCrawlerService(FileProcessor fileProcessor) {
+    public CrawlerService(FileProcessor fileProcessor) {
         this.fileProcessor = fileProcessor;
     }
 
