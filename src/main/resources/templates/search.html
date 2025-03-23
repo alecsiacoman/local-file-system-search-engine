@@ -3,6 +3,113 @@
 <head>
     <title>Search Engine for Local File System</title>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f7f6;
+            color: #333;
+            text-align: center;
+        }
+
+        h1 {
+            color: #2c3e50;
+            margin-top: 50px;
+            font-size: 2.5em;
+        }
+
+        h2 {
+            color: #34495e;
+            margin-top: 40px;
+            font-size: 1.8em;
+        }
+
+        form {
+            margin-top: 20px;
+        }
+
+        input[type="text"] {
+            padding: 12px;
+            width: 60%;
+            max-width: 400px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 1em;
+            outline: none;
+            box-sizing: border-box;
+            transition: border-color 0.3s ease;
+        }
+
+        input[type="text"]:focus {
+            border-color: #2980b9;
+        }
+
+        #searchResults {
+            list-style-type: none;
+            padding: 0;
+            margin-top: 30px;
+            font-size: 1.1em;
+        }
+
+        #searchResults li {
+            padding: 15px;
+            border: 1px solid #ccc;
+            margin-bottom: 15px;
+            border-radius: 5px;
+            background-color: #fff;
+            transition: background-color 0.3s ease;
+        }
+
+        #searchResults li:hover {
+            background-color: #ecf0f1;
+        }
+
+        #searchResults li strong {
+            color: #2980b9;
+            font-weight: 500;
+        }
+
+        #searchResults li p {
+            color: #7f8c8d;
+            margin-top: 5px;
+        }
+
+        .pagination {
+            margin-top: 30px;
+            font-size: 1.1em;
+        }
+
+        .pagination a {
+            text-decoration: none;
+            padding: 10px 15px;
+            margin: 0 10px;
+            background-color: #3498db;
+            color: white;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+        }
+
+        .pagination a:hover {
+            background-color: #2980b9;
+        }
+
+        .pagination a[disabled] {
+            background-color: #bdc3c7;
+            cursor: not-allowed;
+        }
+
+        .container {
+            width: 80%;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+        }
+    </style>
 </head>
 <body>
 <h1>Search Files</h1>
