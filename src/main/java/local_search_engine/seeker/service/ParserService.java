@@ -3,6 +3,8 @@ package local_search_engine.seeker.service;
 import local_search_engine.seeker.repository.FileRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.tika.Tika;
+import org.apache.tika.exception.TikaException;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -13,24 +15,19 @@ import java.nio.file.Path;
 @RequiredArgsConstructor
 @Slf4j
 public class ParserService {
+    private final Tika tika = new Tika();
 
-    private final FileRepository fileRepository;
-    private final FilterService filterService;
-
-    public String extractContent(Path filePath) throws IOException {
-        String extension = getFileExtension(filePath);
-        switch (extension.toLowerCase()) {
-            case "txt":
+    public String extractContent(Path filePath) {
+        try {
+            String mimeType = Files.probeContentType(filePath);
+            if (mimeType != null && mimeType.startsWith("text")) {
                 return Files.readString(filePath);
-            default:
-                return "";
+            }
+
+            return tika.parseToString(filePath.toFile());
+        } catch (IOException | TikaException e) {
+            log.warn("Cannot extract content from file: {}", filePath.getFileName());
+            return "";
         }
     }
-
-    private String getFileExtension(Path path) {
-        String name = path.getFileName().toString();
-        int lastDot = name.lastIndexOf(".");
-        return (lastDot == -1) ? "" : name.substring(lastDot + 1);
-    }
-
 }

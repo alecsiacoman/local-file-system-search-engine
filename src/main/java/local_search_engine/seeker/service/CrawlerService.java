@@ -8,8 +8,6 @@ import java.util.stream.Stream;
 
 import local_search_engine.seeker.processor.FileProcessor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.event.ContextRefreshedEvent;
-import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -25,40 +23,37 @@ public class CrawlerService {
         this.fileProcessor = fileProcessor;
     }
 
-    @EventListener(ContextRefreshedEvent.class)
-    public void onApplicationStart() {
-        log.info("Application started! Beginning initial crawling...");
-        String directoryPath = "C:/Users/coman/Desktop/search-engine-test";
-        try {
-            crawlDirectory(directoryPath);
-            log.info("Initial crawling completed.");
-        } catch (IOException e) {
-            log.error("Error during initial crawling: " + e.getMessage());
-        }
-    }
-
-    public void crawlDirectory(String directoryPath) throws IOException {
+    public void initialCrawl(String directoryPath) {
+        log.info("Starting initial crawl for directory: {}", directoryPath);
         List<Path> fileBatch = new ArrayList<>();
 
         try (Stream<Path> paths = Files.walk(Paths.get(directoryPath))) {
-            for (Iterator<Path> it = paths.iterator(); it.hasNext(); ) {
-                Path file = it.next();
-
+            paths.forEach(file -> {
                 if (Files.isRegularFile(file)) {
-                    log.info("Adding file {} to batch...", file.getFileName());
                     fileBatch.add(file);
                     if (fileBatch.size() >= BATCH_SIZE) {
-                        processBatch(new ArrayList<>(fileBatch));
+                        processBatch(fileBatch);
                         fileBatch.clear();
                     }
                 }
+            });
+
+            if (!fileBatch.isEmpty()) {
+                processBatch(fileBatch);
             }
-        }
 
-        if (!fileBatch.isEmpty()) {
-            processBatch(fileBatch);
+        } catch (IOException e) {
+            log.error("Error during crawling: {}", e.getMessage());
         }
+        log.info("Initial crawl finished.");
+        shutdownExecutor();
+    }
 
+    private void processBatch(List<Path> batch) {
+        executor.submit(() -> fileProcessor.processFiles(batch));
+    }
+
+    private void shutdownExecutor() {
         executor.shutdown();
         try {
             executor.awaitTermination(1, TimeUnit.HOURS);
@@ -67,7 +62,10 @@ public class CrawlerService {
         }
     }
 
-    private void processBatch(List<Path> batch) {
-        executor.submit(() -> fileProcessor.processFiles(batch));
+    public void indexFile(Path file) {
+        executor.submit(() -> {
+            List<Path> singleFileList = Collections.singletonList(file);
+            fileProcessor.processFiles(singleFileList);
+        });
     }
 }
