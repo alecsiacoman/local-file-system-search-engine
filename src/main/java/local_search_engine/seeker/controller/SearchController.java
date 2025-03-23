@@ -12,10 +12,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.ModelAndView;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.HashMap;
+import java.util.Map;
 
 @Controller
 public class SearchController {
@@ -31,10 +34,10 @@ public class SearchController {
     }
 
     @GetMapping("/search")
-    public String search(@RequestParam("query") String query,
-                         @RequestParam(defaultValue = "0") int page,
-                         @RequestParam(defaultValue = "10") int size,
-                         Model model) {
+    public String searchPage(@RequestParam("query") String query,
+                             @RequestParam(defaultValue = "0") int page,
+                             @RequestParam(defaultValue = "10") int size,
+                             Model model) {
         Pageable pageable = PageRequest.of(page, size);
         Page<IndexedFile> results = searchService.searchFiles(query, pageable);
 
@@ -43,7 +46,23 @@ public class SearchController {
         model.addAttribute("currentPage", page);
         model.addAttribute("query", query);
 
-        return "search";
+        return "search"; // Return the search page populated with results
+    }
+
+    @GetMapping("/search/ajax")
+    @ResponseBody
+    public Map<String, Object> searchAjax(@RequestParam("query") String query,
+                                          @RequestParam(defaultValue = "0") int page,
+                                          @RequestParam(defaultValue = "10") int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<IndexedFile> results = searchService.searchFiles(query, pageable);
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("files", results.getContent());
+        response.put("totalPages", results.getTotalPages());
+        response.put("currentPage", page);
+
+        return response;
     }
 
     @GetMapping("/open-file")

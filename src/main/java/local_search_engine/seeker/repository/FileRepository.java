@@ -14,7 +14,8 @@ public interface FileRepository extends JpaRepository<IndexedFile, UUID> {
     @Query(value = """
             SELECT * FROM files
             WHERE file_name ILIKE %:query% 
-            OR content_tsv @@ plainto_tsquery('english', :query)
+            OR content_tsv @@ plainto_tsquery('english', :query) 
+            OR content ILIKE %:query% 
             """, nativeQuery = true)
     Page<IndexedFile> searchFiles(@Param("query") String query, Pageable pageable);
 

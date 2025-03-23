@@ -2,33 +2,67 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <title>Search Engine for Local File System</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
 <body>
 <h1>Search Files</h1>
 <form action="/search" method="get">
-    <input type="text" name="query" placeholder="Enter keyword" required>
-    <button type="submit">Search</button>
+    <input type="text" name="query" placeholder="Enter keyword" id="searchInput" required>
 </form>
 
 <h2>Results:</h2>
-<ul>
-    <li th:each="file : ${files}">
-        <a th:href="@{|/open-file?filePath=${file.filePath}|}" th:text="${file.fileName}"></a> -
-        <span th:text="${file.filePath}"></span>
-        <p th:text="${file.content.length() > 100 ? file.content.substring(0, 100) + '...' : file.content}"></p>
-    </li>
+<ul id="searchResults">
+    <!-- Search results will be populated here -->
 </ul>
 
 <div>
     <span th:if="${currentPage != null and currentPage > 0}">
     <a th:href="@{|/search?query=${query}&page=${currentPage - 1}&size=10|}">Previous</a>
-</span>
+    </span>
 
     <span th:if="${currentPage != null and totalPages != null and currentPage + 1 < totalPages}">
     <a th:href="@{|/search?query=${query}&page=${currentPage + 1}&size=10|}">Next</a>
-</span>
-
+    </span>
 </div>
+
+<script>
+    $(document).ready(function() {
+        $('#searchInput').on('input', function() {
+            const query = $(this).val();
+            if (query.trim() !== "") {
+                $.ajax({
+                    url: '/search/ajax', // Change to the new AJAX endpoint
+                    type: 'GET',
+                    data: { query: query },
+                    success: function(data) {
+                        console.log('Search Results:', data);
+                        $('#searchResults').empty(); // Clear previous results
+
+                        if (data.files && data.files.length > 0) {
+                            data.files.forEach(function(file) {
+                                $('#searchResults').append(`
+                                <li>
+                                    <a href="/open-file?filePath=${file.filePath}">${file.fileName}</a> -
+                                    <span>${file.filePath}</span>
+                                    <p>${file.content.length > 100 ? file.content.substring(0, 100) + '...' : file.content}</p>
+                                </li>
+                            `);
+                            });
+                        } else {
+                            $('#searchResults').append('<li>No files found</li>');
+                        }
+                    },
+                    error: function(error) {
+                        console.log('Error:', error);
+                    }
+                });
+            } else {
+                $('#searchResults').empty(); // Clear results if input is empty
+            }
+        });
+    });
+
+</script>
 
 </body>
 </html>
