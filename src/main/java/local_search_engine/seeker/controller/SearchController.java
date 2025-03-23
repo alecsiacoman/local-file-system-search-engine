@@ -4,6 +4,9 @@ import local_search_engine.seeker.model.IndexedFile;
 import local_search_engine.seeker.service.SearchService;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -13,8 +16,6 @@ import org.springframework.web.bind.annotation.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.List;
-import java.util.UUID;
 
 @Controller
 public class SearchController {
@@ -30,10 +31,18 @@ public class SearchController {
     }
 
     @GetMapping("/search")
-    public String search(@RequestParam("query") String query, Model model) {
-        List<IndexedFile> results = searchService.searchFiles(query);
+    public String search(@RequestParam("query") String query,
+                         @RequestParam(defaultValue = "0") int page,
+                         @RequestParam(defaultValue = "10") int size,
+                         Model model) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<IndexedFile> results = searchService.searchFiles(query, pageable);
 
-        model.addAttribute("files", results);
+        model.addAttribute("files", results.getContent());
+        model.addAttribute("totalPages", results.getTotalPages());
+        model.addAttribute("currentPage", page);
+        model.addAttribute("query", query);
+
         return "search";
     }
 

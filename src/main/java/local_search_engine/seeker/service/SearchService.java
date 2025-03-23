@@ -4,6 +4,9 @@ import local_search_engine.seeker.model.IndexedFile;
 import local_search_engine.seeker.repository.FileRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
@@ -16,8 +19,8 @@ public class SearchService {
     @Autowired
     private FileRepository fileRepository;
 
-    public List<IndexedFile> searchFiles(String keyword) {
-        return fileRepository.searchFiles(keyword);
+    public Page<IndexedFile> searchFiles(String query, Pageable pageable) {
+        return fileRepository.searchFiles(query, pageable);
     }
 
     public boolean openFile(String filePath) {

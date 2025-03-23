@@ -13,12 +13,22 @@
 <h2>Results:</h2>
 <ul>
     <li th:each="file : ${files}">
-        <a th:href="@{'/open-file?filePath=' + ${file.filePath}}" th:text="${file.fileName}"></a> -
+        <a th:href="@{|/open-file?filePath=${file.filePath}|}" th:text="${file.fileName}"></a> -
         <span th:text="${file.filePath}"></span>
         <p th:text="${file.content.length() > 100 ? file.content.substring(0, 100) + '...' : file.content}"></p>
     </li>
 </ul>
 
+<div>
+    <span th:if="${currentPage != null and currentPage > 0}">
+    <a th:href="@{|/search?query=${query}&page=${currentPage - 1}&size=10|}">Previous</a>
+</span>
+
+    <span th:if="${currentPage != null and totalPages != null and currentPage + 1 < totalPages}">
+    <a th:href="@{|/search?query=${query}&page=${currentPage + 1}&size=10|}">Next</a>
+</span>
+
+</div>
 
 </body>
 </html>
