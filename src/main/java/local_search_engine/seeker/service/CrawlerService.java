@@ -8,6 +8,8 @@ import java.util.stream.Stream;
 
 import local_search_engine.seeker.processor.FileProcessor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -21,6 +23,18 @@ public class CrawlerService {
 
     public CrawlerService(FileProcessor fileProcessor) {
         this.fileProcessor = fileProcessor;
+    }
+
+    @EventListener(ContextRefreshedEvent.class)
+    public void onApplicationStart() {
+        log.info("Application started! Beginning initial crawling...");
+        String directoryPath = "C:/Users/coman/Desktop/search-engine-test";
+        try {
+            crawlDirectory(directoryPath);
+            log.info("Initial crawling completed.");
+        } catch (IOException e) {
+            log.error("Error during initial crawling: " + e.getMessage());
+        }
     }
 
     public void crawlDirectory(String directoryPath) throws IOException {
