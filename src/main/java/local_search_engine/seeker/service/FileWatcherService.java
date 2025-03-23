@@ -5,6 +5,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+
 import java.nio.file.*;
 import java.io.IOException;
 
@@ -18,6 +21,7 @@ public class FileWatcherService {
     private FileRepository fileRepository;
 
     @Async
+    @Transactional
     public void startWatching(Path directory) throws IOException {
         WatchService watchService = FileSystems.getDefault().newWatchService();
         directory.register(watchService, StandardWatchEventKinds.ENTRY_CREATE,
@@ -37,14 +41,19 @@ public class FileWatcherService {
                 WatchEvent.Kind<?> kind = event.kind();
                 Path changedFile = directory.resolve((Path) event.context());
 
-                if (kind == StandardWatchEventKinds.ENTRY_CREATE || kind == StandardWatchEventKinds.ENTRY_MODIFY) {
+                if (kind == StandardWatchEventKinds.ENTRY_CREATE) {
+                    if (Files.isRegularFile(changedFile)) {
+                        log.info("File created: {}", changedFile);
+                        crawlerService.indexFile(changedFile);
+                    }
+                } else if (kind == StandardWatchEventKinds.ENTRY_MODIFY) {
                     if (Files.isRegularFile(changedFile)) {
                         log.info("File modified: {}", changedFile);
+                        deleteFileRecord(changedFile);
                         crawlerService.indexFile(changedFile);
                     }
                 } else if (kind == StandardWatchEventKinds.ENTRY_DELETE) {
-                    log.info("File deleted: {}", changedFile);
-                    fileRepository.deleteByFilePath(changedFile.toString());
+                    deleteFileRecord(changedFile);
                 }
             }
 
@@ -53,6 +62,11 @@ public class FileWatcherService {
                 break;
             }
         }
+    }
+
+    public void deleteFileRecord(Path filePath) {
+        fileRepository.deleteByFilePath(filePath.toString());
+        log.info("File with path {} deleted from the database.", filePath);
     }
 }
 

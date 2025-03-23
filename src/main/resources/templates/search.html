@@ -42,7 +42,7 @@
                             data.files.forEach(function(file) {
                                 $('#searchResults').append(`
                                 <li>
-                                    <a href="/open-file?filePath=${file.filePath}">${file.fileName}</a> -
+                                    <strong>${file.fileName}</strong> -
                                     <span>${file.filePath}</span>
                                     <p>${file.content.length > 100 ? file.content.substring(0, 100) + '...' : file.content}</p>
                                 </li>

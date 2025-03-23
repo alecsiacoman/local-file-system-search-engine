@@ -46,7 +46,7 @@ public class CrawlerService {
             log.error("Error during crawling: {}", e.getMessage());
         }
         log.info("Initial crawl finished.");
-        shutdownExecutor();
+       // shutdownExecutor();
     }
 
     private void processBatch(List<Path> batch) {
