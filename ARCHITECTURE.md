@@ -18,9 +18,9 @@ It illustrates the interaction between the user, the Seeker application, and the
 
 The Container Diagram illustrates the high-level technology choices and how responsibilities are distributed across different containers.
 
-* **Web Application:**
+* **Web BruteForceSeekerApplication:**
     * Serves as the user-facing interface, providing the means for users to input search queries and view results. It's built using HTML, CSS and Thymeleaf, for a simple and responsive GUI.
-* **Backend Application:**
+* **Backend BruteForceSeekerApplication:**
     * Represents the core logic of the search engine, processing user requests, coordinating search operations, and managing file retrieval. It's designed with Java and Spring MVC.
 * **Indexing Service:**
     * Operates as a background process responsible for keeping the search index up-to-date. It crawls the local file system, extracts relevant data, and populates the PostgreSQL database. Java and Spring MVC provide the framework for its operation.
@@ -30,11 +30,11 @@ The Container Diagram illustrates the high-level technology choices and how resp
 
 ##   4.  Component Diagrams
 
-###   4.1  Backend Application Components
+###   4.1  Backend BruteForceSeekerApplication Components
 ![Backend Component Diagram](assets/images/backend_component_diagram.png)
 
 
-The Backend Application container is composed of the following components:
+The Backend BruteForceSeekerApplication container is composed of the following components:
 
 * `   `**Search Controller:**
     * `   `   `Responsibility:

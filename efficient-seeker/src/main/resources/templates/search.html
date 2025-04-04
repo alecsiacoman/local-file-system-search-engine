@@ -138,12 +138,12 @@
             const query = $(this).val();
             if (query.trim() !== "") {
                 $.ajax({
-                    url: '/search/ajax', // Change to the new AJAX endpoint
+                    url: '/search/ajax',
                     type: 'GET',
                     data: { query: query },
                     success: function(data) {
                         console.log('Search Results:', data);
-                        $('#searchResults').empty(); // Clear previous results
+                        $('#searchResults').empty();
 
                         if (data.files && data.files.length > 0) {
                             data.files.forEach(function(file) {
@@ -164,7 +164,7 @@
                     }
                 });
             } else {
-                $('#searchResults').empty(); // Clear results if input is empty
+                $('#searchResults').empty();
             }
         });
     });
