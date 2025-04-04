@@ -11,7 +11,8 @@
 	<groupId>local-search-engine</groupId>
 	<artifactId>seeker</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>seeker1.0</name>
+    <packaging>pom</packaging>
+    <name>seeker1.0</name>
 	<description>Search Engine for Local File System</description>
 	<url/>
 	<licenses>
@@ -20,7 +21,11 @@
 	<developers>
 		<developer/>
 	</developers>
-	<scm>
+    <modules>
+        <module>bruteforce-seeker</module>
+        <module>efficient-seeker</module>
+    </modules>
+    <scm>
 		<connection/>
 		<developerConnection/>
 		<tag/>
