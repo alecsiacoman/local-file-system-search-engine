@@ -30,9 +30,25 @@ public class WorkerService {
                 searchRecursive(child, query, results);
             }
         } else {
-            if (file.getName().toLowerCase().contains(query)) {
-                results.add(new FileResult(file.getAbsolutePath(), 1.0));
+            double score = calculateScore(file.getName(), query);
+            if (score > 0) {
+                results.add(new FileResult(file.getAbsolutePath(), score));
             }
+        }
+    }
+
+    private double calculateScore(String fileName, String query) {
+        int queryLength = query.length();
+        int matchLength = 0;
+
+        if (fileName.toLowerCase().contains(query)) {
+            matchLength = fileName.toLowerCase().indexOf(query) + queryLength;
+        }
+
+        if (matchLength > 0) {
+            return Math.min(1.0, (double) matchLength / fileName.length());
+        } else {
+            return 0;
         }
     }
 }
