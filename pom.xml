@@ -89,6 +89,21 @@
 				<artifactId>spring-boot-maven-plugin</artifactId>
 			</plugin>
 		</plugins>
+
+
 	</build>
+
+	<profiles>
+		<profile>
+			<id>no-db</id>
+			<properties>
+				<spring.datasource.url>jdbc:h2:mem:testdb</spring.datasource.url>
+				<spring.datasource.driverClassName>org.h2.Driver</spring.datasource.driverClassName>
+				<spring.datasource.username>sa</spring.datasource.username>
+				<spring.datasource.password>password</spring.datasource.password>
+			</properties>
+		</profile>
+	</profiles>
+
 
 </project>
