@@ -16,7 +16,8 @@ public class MasterService {
     private final RestTemplate restTemplate = new RestTemplate();
     private final List<String> workerUrls = List.of(
             "http://localhost:3901/api/search",
-            "http://localhost:3902/api/search"
+            "http://localhost:3902/api/search",
+            "http://localhost:3903/api/search"
     );
     private final Map<String, List<FileResult>> cache = new ConcurrentHashMap<>();
 
