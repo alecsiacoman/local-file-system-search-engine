@@ -11,13 +11,9 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.io.File;
-import java.io.IOException;
-import java.time.LocalTime;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -25,6 +21,8 @@ public class SearchService {
     @Autowired
     private FileRepository fileRepository;
 
+    @Autowired
+    private RankingService rankingService;
 
     public Page<IndexedFile> searchFiles(String query, Pageable pageable) {
         if (query == null || query.trim().isEmpty()) {
@@ -43,8 +41,8 @@ public class SearchService {
         }
 
         List<IndexedFile> sortedFiles = dbResults.getContent().stream()
-                .peek(file -> file.setScore(RankingService.computeRankByReport(file)))
-                .sorted(Comparator.comparingDouble(RankingService::computeRankByReport).reversed())
+                .peek(file -> file.setScore(rankingService.computeRankByReport(file)))  // Call the instance method
+                .sorted(Comparator.comparingDouble(rankingService::computeRankByReport).reversed())  // Call the instance method
                 .toList();
 
         int start = (int) pageable.getOffset();

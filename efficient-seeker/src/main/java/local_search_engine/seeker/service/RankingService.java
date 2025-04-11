@@ -6,8 +6,11 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class RankingService {
-    public static double computeRankByReport(IndexedFile file) {
-        String rankingFormat = "average";
+
+    @Value("${index.report.format}")
+    private String rankingFormat;
+
+    public double computeRankByReport(IndexedFile file) {
         return switch (rankingFormat) {
             case "average" -> computeRankByAverage(file);
             case "last_access" -> computeRankByLastAccess(file);
@@ -24,7 +27,7 @@ public class RankingService {
         - recent file access
         - file size
      */
-    private static double computeRankByAverage(IndexedFile file) {
+    private double computeRankByAverage(IndexedFile file) {
         double score = 0.0;
 
         if (file.getFilePath() != null && file.getFilePath().toLowerCase().contains("important")) {
@@ -36,7 +39,7 @@ public class RankingService {
         return score;
     }
 
-    private static double computeRankByLastAccess(IndexedFile file) {
+    private double computeRankByLastAccess(IndexedFile file) {
         long modifiedTime = java.time.Instant.parse(file.getLastModified()).toEpochMilli();
         long now = System.currentTimeMillis();
         long age = now - modifiedTime;
@@ -44,16 +47,16 @@ public class RankingService {
         return Math.max(0.0, 1_000_000.0 / (age + 1));
     }
 
-    private static double computeRankByShorterPath(IndexedFile file) {
+    private double computeRankByShorterPath(IndexedFile file) {
         return getPathLengthFactor(file);
     }
 
-    private static double getPathLengthFactor(IndexedFile file) {
+    private double getPathLengthFactor(IndexedFile file) {
         return 1.0 / (file.getFilePath().length() + 1);
     }
 
-    private static double getExtensionFactor(IndexedFile file) {
-        if(file.getExtension() != null) {
+    private double getExtensionFactor(IndexedFile file) {
+        if (file.getExtension() != null) {
             switch (file.getExtension()) {
                 case "java":
                     return 1.5;
@@ -68,14 +71,14 @@ public class RankingService {
         return 0.0;
     }
 
-    private static double getSizeFactor(IndexedFile file) {
+    private double getSizeFactor(IndexedFile file) {
         if (file.getSize() < 1000) {
             return 0.5;
         }
         return 1.0;
     }
 
-    private static double getAccessTimeFactor(IndexedFile file) {
+    private double getAccessTimeFactor(IndexedFile file) {
         long modifiedTime = java.time.Instant.parse(file.getLastModified()).toEpochMilli();
         long now = System.currentTimeMillis();
         long age = now - modifiedTime;
