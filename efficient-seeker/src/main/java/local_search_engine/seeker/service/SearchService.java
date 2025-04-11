@@ -25,6 +25,10 @@ public class SearchService {
     private FileRepository fileRepository;
 
     public Page<IndexedFile> searchFiles(String query, Pageable pageable) {
+        if (query == null || query.trim().isEmpty()) {
+            return Page.empty(pageable);
+        }
+
         QueryCriteria queryCriteria = parseQuery(query);
         Page<IndexedFile> dbResults;
 
@@ -37,6 +41,7 @@ public class SearchService {
         }
 
         List<IndexedFile> sortedFiles = dbResults.getContent().stream()
+                .peek(file -> file.setScore(computeRank(file)))
                 .sorted(Comparator.comparingDouble(this::computeRank).reversed())
                 .toList();
 
@@ -44,54 +49,9 @@ public class SearchService {
         int end = Math.min(start + pageable.getPageSize(), sortedFiles.size());
         List<IndexedFile> pageContent = (start > end) ? Collections.emptyList() : sortedFiles.subList(start, end);
 
+
         return new PageImpl<>(pageContent, pageable, sortedFiles.size());
     }
-
-
-
-//    public Page<IndexedFile> searchFiles(String query, Pageable pageable) {
-//        QueryCriteria queryCriteria = parseQuery(query);
-//
-//        String initialQuery = query.trim().toLowerCase();
-//        Page<IndexedFile> dbResults = fileRepository.searchFiles(initialQuery, Pageable.unpaged());
-//
-//        /*
-//            Retrieved files from database are either matched with
-//            path:A/B, or with content:C or with the initial query
-//         */
-//        List<IndexedFile> filteredFiles = dbResults.stream()
-//                .filter(file -> {
-//                    boolean matches = true;
-//                    if (queryCriteria.content != null && !queryCriteria.content.isBlank()) {
-//                        matches &= file.getContent() != null &&
-//                                file.getContent().toLowerCase().contains(queryCriteria.content.toLowerCase());
-//                    } else {
-//                        // fallback: match content with query
-//                        matches &= file.getContent() != null &&
-//                                file.getContent().toLowerCase().contains(initialQuery);
-//                    }
-//
-//                    if (queryCriteria.path != null && !queryCriteria.path.isBlank()) {
-//                        matches &= file.getFilePath() != null &&
-//                                file.getFilePath().toLowerCase().contains(queryCriteria.path.toLowerCase());
-//                    } else {
-//                        // fallback: match path and name with query
-//                        matches &= (file.getFilePath() != null && file.getFilePath().toLowerCase().contains(initialQuery)) ||
-//                                (file.getFileName() != null && file.getFileName().toLowerCase().contains(initialQuery));
-//                    }
-//
-//                    return matches;
-//                })
-//                .sorted(Comparator.comparingDouble(this::computeRank).reversed())
-//                .toList();
-//
-//        int start = (int) pageable.getOffset();
-//        int end = Math.min(start + pageable.getPageSize(), filteredFiles.size());
-//        List<IndexedFile> pageContent = (start > end) ? Collections.emptyList() : filteredFiles.subList(start, end);
-//
-//        return new PageImpl<>(pageContent, pageable, filteredFiles.size());
-//    }
-
 
     private QueryCriteria parseQuery(String query) {
         QueryCriteria queryCriteria = new QueryCriteria();

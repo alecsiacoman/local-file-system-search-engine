@@ -1,6 +1,7 @@
 package local_search_engine.seeker.model;
 
 import jakarta.persistence.*;
+import jakarta.transaction.Transactional;
 import lombok.*;
 import java.util.UUID;
 
@@ -32,5 +33,7 @@ public class IndexedFile {
 
     @Column(columnDefinition = "jsonb")
     private String metadata;
+
+    private double score;
 }
 

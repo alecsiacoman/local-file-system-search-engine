@@ -63,18 +63,5 @@ public class SearchController {
 
         return response;
     }
-
-    @GetMapping("/open-file")
-    public ResponseEntity<Resource> openFile(@RequestParam("filePath") String filePath) {
-        Path path = Paths.get(filePath);
-        if (Files.exists(path)) {
-            Resource resource = new FileSystemResource(path);
-            return ResponseEntity.ok()
-                    .contentType(MediaType.APPLICATION_OCTET_STREAM)
-                    .body(resource);
-        } else {
-            return ResponseEntity.notFound().build();
-        }
-    }
 }
 
