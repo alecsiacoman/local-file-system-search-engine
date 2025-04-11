@@ -18,14 +18,40 @@ public interface FileRepository extends JpaRepository<IndexedFile, UUID> {
     @Query(value = "DELETE FROM files i WHERE i.file_path = :filePath", nativeQuery = true)
     void deleteByFilePath(@Param("filePath") String filePath);
 
-
     @Query(value = """
-            SELECT * FROM files
-            WHERE file_name ILIKE %:query% 
-            OR content_tsv @@ plainto_tsquery('english', :query) 
-            OR content ILIKE %:query% 
+        SELECT * FROM files
+        WHERE
+            content_tsv @@ plainto_tsquery('english', :query)
+            OR file_name_tsv @@ plainto_tsquery('english', :query)
+            OR file_name ILIKE %:query%
+            OR file_path ILIKE %:query%
             """, nativeQuery = true)
     Page<IndexedFile> searchFiles(@Param("query") String query, Pageable pageable);
+
+    @Query(value = """
+    SELECT * FROM files 
+    WHERE content_tsv @@ plainto_tsquery('english', :query) 
+    OR content ILIKE %:query%
+    """, nativeQuery = true)
+    Page<IndexedFile> searchByContent(@Param("query") String query, Pageable pageable);
+
+    @Query(value = """
+    SELECT * FROM files 
+    WHERE file_path ILIKE %:query%
+    """, nativeQuery = true)
+    Page<IndexedFile> searchByPath(@Param("query") String query, Pageable pageable);
+
+    @Query(value = """
+    SELECT * FROM files 
+    WHERE file_name_tsv @@ plainto_tsquery('english', :query)
+    OR content_tsv @@ plainto_tsquery('english', :query)
+    OR file_name ILIKE %:query% 
+    OR content ILIKE %:query%
+    OR file_path ILIKE %:query%
+    """, nativeQuery = true)
+    Page<IndexedFile> searchEverywhere(@Param("query") String query, Pageable pageable);
+
+
 
     boolean existsByFilePathAndLastModified(String filePath, String lastModified);
 
