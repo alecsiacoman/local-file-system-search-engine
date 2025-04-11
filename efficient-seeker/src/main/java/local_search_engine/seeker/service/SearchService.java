@@ -1,5 +1,6 @@
 package local_search_engine.seeker.service;
 
+import com.fasterxml.jackson.annotation.JacksonAnnotationsInside;
 import local_search_engine.seeker.model.IndexedFile;
 import local_search_engine.seeker.model.QueryCriteria;
 import local_search_engine.seeker.repository.FileRepository;
@@ -24,12 +25,15 @@ public class SearchService {
     @Autowired
     private FileRepository fileRepository;
 
+    @Autowired
+    private RankingService rankingService;
+
     public Page<IndexedFile> searchFiles(String query, Pageable pageable) {
         if (query == null || query.trim().isEmpty()) {
             return Page.empty(pageable);
         }
 
-        QueryCriteria queryCriteria = parseQuery(query);
+        QueryCriteria queryCriteria = new QueryCriteria(query);
         Page<IndexedFile> dbResults;
 
         if (queryCriteria.content != null) {
@@ -41,8 +45,8 @@ public class SearchService {
         }
 
         List<IndexedFile> sortedFiles = dbResults.getContent().stream()
-                .peek(file -> file.setScore(computeRank(file)))
-                .sorted(Comparator.comparingDouble(this::computeRank).reversed())
+                .peek(file -> file.setScore(RankingService.computeRank(file)))
+                .sorted(Comparator.comparingDouble(RankingService::computeRank).reversed())
                 .toList();
 
         int start = (int) pageable.getOffset();
@@ -52,60 +56,4 @@ public class SearchService {
 
         return new PageImpl<>(pageContent, pageable, sortedFiles.size());
     }
-
-    private QueryCriteria parseQuery(String query) {
-        QueryCriteria queryCriteria = new QueryCriteria();
-        String[] parts = query.split("\\s+");
-        for(String part: parts) {
-            if(part.startsWith("content:")){
-                queryCriteria.content = part.substring(8);
-            } else if(part.startsWith("path:")){
-                queryCriteria.path = part.substring(5);
-            }
-        }
-        return queryCriteria;
-    }
-
-    private double computeRank(IndexedFile file) {
-        double score = 0.0;
-
-        //keyword presence in path
-        if (file.getFilePath() != null && file.getFilePath().toLowerCase().contains("important")) {
-            score += 2.0;
-        }
-
-        //path length -> shorter path means higher score
-        score += 1.0 / (file.getFilePath().length() + 1);
-
-        //file extension prioritization
-        if(file.getExtension() != null) {
-            switch (file.getExtension()) {
-                case "java":
-                    score += 1.5;
-                    break;
-                case "txt":
-                    score += 1.0;
-                    break;
-                case "md":
-                    score += 0.5;
-                    break;
-                default:
-                    break;
-            }
-        }
-
-        //recent file access
-        long modifiedTime = java.time.Instant.parse(file.getLastModified()).toEpochMilli();
-        long now = System.currentTimeMillis();
-        long age = now - modifiedTime;
-        score += Math.max(0.0, 1_000_000.0 / (age + 1));
-
-        //file size
-        if(file.getSize() < 1000) {
-            score += 0.5;
-        }
-
-        return score;
-    }
-
 }
