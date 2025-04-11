@@ -6,10 +6,6 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class RankingService {
-
-    @Value("${index.report.format}")
-    private String rankingFormat;
-
     public double computeRankByReport(IndexedFile file, String rankingFormat) {
         return switch (rankingFormat) {
             case "average" -> computeRankByAverage(file);

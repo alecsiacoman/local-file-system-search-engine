@@ -132,6 +132,23 @@
             border-color: #2980b9;
             background-color: #ecf0f1;
         }
+
+        .suggestions {
+            margin-top: 30px;
+        }
+
+        .suggestions ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        .suggestions li {
+            padding: 10px;
+            border: 1px solid #ccc;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            background-color: #fff;
+        }
     </style>
 </head>
 <body>
@@ -151,6 +168,13 @@
 <ul id="searchResults">
 
 </ul>
+
+<h3>Suggested Queries:</h3>
+<div class="suggestions">
+    <ul>
+        <li th:each="suggestion : ${suggestions}" th:text="${suggestion}"></li>
+    </ul>
+</div>
 
 <div class="pagination">
     <span th:if="${currentPage > 0}">

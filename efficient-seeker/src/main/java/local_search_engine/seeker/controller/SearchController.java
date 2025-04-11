@@ -1,7 +1,9 @@
 package local_search_engine.seeker.controller;
 
 import local_search_engine.seeker.model.IndexedFile;
+import local_search_engine.seeker.service.SearchHistory;
 import local_search_engine.seeker.service.SearchService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -16,9 +18,12 @@ import java.util.Map;
 @Controller
 public class SearchController {
     private final SearchService searchService;
+    private final SearchHistory searchHistory;
 
-    public SearchController(SearchService searchService) {
+    public SearchController(SearchService searchService, SearchHistory searchHistory) {
         this.searchService = searchService;
+        this.searchHistory = searchHistory;
+        this.searchService.addObserver(searchHistory);
     }
 
     @GetMapping("/")
@@ -39,6 +44,8 @@ public class SearchController {
         model.addAttribute("totalPages", results.getTotalPages());
         model.addAttribute("currentPage", page);
         model.addAttribute("query", query);
+
+        model.addAttribute("suggestions", searchHistory.suggestQueries());
 
         return "search";
     }
