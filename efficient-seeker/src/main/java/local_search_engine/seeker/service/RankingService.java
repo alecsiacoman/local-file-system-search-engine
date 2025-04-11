@@ -1,49 +1,84 @@
 package local_search_engine.seeker.service;
 
 import local_search_engine.seeker.model.IndexedFile;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 @Service
 public class RankingService {
-    public static double computeRank(IndexedFile file) {
+    public static double computeRankByReport(IndexedFile file) {
+        String rankingFormat = "average";
+        return switch (rankingFormat) {
+            case "average" -> computeRankByAverage(file);
+            case "last_access" -> computeRankByLastAccess(file);
+            case "shorter_path" -> computeRankByShorterPath(file);
+            default -> 0;
+        };
+    }
+
+    /*
+    Average ranking takes into consideration:
+        - keyword "important" present in the path
+        - path length -> shorter path means higher score
+        - file extension prioritization
+        - recent file access
+        - file size
+     */
+    private static double computeRankByAverage(IndexedFile file) {
         double score = 0.0;
 
-        //keyword presence in path
         if (file.getFilePath() != null && file.getFilePath().toLowerCase().contains("important")) {
             score += 2.0;
         }
 
-        //path length -> shorter path means higher score
-        score += 1.0 / (file.getFilePath().length() + 1);
+        score += getPathLengthFactor(file) + getExtensionFactor(file) + getAccessTimeFactor(file) + getSizeFactor(file);
 
-        //file extension prioritization
+        return score;
+    }
+
+    private static double computeRankByLastAccess(IndexedFile file) {
+        long modifiedTime = java.time.Instant.parse(file.getLastModified()).toEpochMilli();
+        long now = System.currentTimeMillis();
+        long age = now - modifiedTime;
+
+        return Math.max(0.0, 1_000_000.0 / (age + 1));
+    }
+
+    private static double computeRankByShorterPath(IndexedFile file) {
+        return getPathLengthFactor(file);
+    }
+
+    private static double getPathLengthFactor(IndexedFile file) {
+        return 1.0 / (file.getFilePath().length() + 1);
+    }
+
+    private static double getExtensionFactor(IndexedFile file) {
         if(file.getExtension() != null) {
             switch (file.getExtension()) {
                 case "java":
-                    score += 1.5;
-                    break;
+                    return 1.5;
                 case "txt":
-                    score += 1.0;
-                    break;
+                    return 1.0;
                 case "md":
-                    score += 0.5;
-                    break;
+                    return 0.5;
                 default:
                     break;
             }
         }
+        return 0.0;
+    }
 
-        //recent file access
+    private static double getSizeFactor(IndexedFile file) {
+        if (file.getSize() < 1000) {
+            return 0.5;
+        }
+        return 1.0;
+    }
+
+    private static double getAccessTimeFactor(IndexedFile file) {
         long modifiedTime = java.time.Instant.parse(file.getLastModified()).toEpochMilli();
         long now = System.currentTimeMillis();
         long age = now - modifiedTime;
-        score += Math.max(0.0, 1_000_000.0 / (age + 1));
-
-        //file size
-        if(file.getSize() < 1000) {
-            score += 0.5;
-        }
-
-        return score;
+        return Math.max(0.0, 1_000_000.0 / (age + 1));
     }
 }
