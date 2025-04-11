@@ -2,20 +2,14 @@ package local_search_engine.seeker.controller;
 
 import local_search_engine.seeker.model.IndexedFile;
 import local_search_engine.seeker.service.SearchService;
-import org.springframework.core.io.FileSystemResource;
-import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -36,9 +30,10 @@ public class SearchController {
     public String searchPage(@RequestParam("query") String query,
                              @RequestParam(defaultValue = "0") int page,
                              @RequestParam(defaultValue = "10") int size,
+                             @RequestParam(defaultValue = "average") String rankingFormat,
                              Model model) {
         Pageable pageable = PageRequest.of(page, size);
-        Page<IndexedFile> results = searchService.searchFiles(query, pageable);
+        Page<IndexedFile> results = searchService.searchFiles(query, rankingFormat, pageable);
 
         model.addAttribute("files", results.getContent());
         model.addAttribute("totalPages", results.getTotalPages());
@@ -52,9 +47,10 @@ public class SearchController {
     @ResponseBody
     public Map<String, Object> searchAjax(@RequestParam("query") String query,
                                           @RequestParam(defaultValue = "0") int page,
-                                          @RequestParam(defaultValue = "10") int size) {
+                                          @RequestParam(defaultValue = "10") int size,
+                                          @RequestParam(defaultValue = "average") String rankingFormat) {
         Pageable pageable = PageRequest.of(page, size);
-        Page<IndexedFile> results = searchService.searchFiles(query, pageable);
+        Page<IndexedFile> results = searchService.searchFiles(query, rankingFormat, pageable);
 
         Map<String, Object> response = new HashMap<>();
         response.put("files", results.getContent());

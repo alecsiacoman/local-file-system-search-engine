@@ -10,7 +10,7 @@ public class RankingService {
     @Value("${index.report.format}")
     private String rankingFormat;
 
-    public double computeRankByReport(IndexedFile file) {
+    public double computeRankByReport(IndexedFile file, String rankingFormat) {
         return switch (rankingFormat) {
             case "average" -> computeRankByAverage(file);
             case "last_access" -> computeRankByLastAccess(file);

@@ -24,7 +24,7 @@ public class SearchService {
     @Autowired
     private RankingService rankingService;
 
-    public Page<IndexedFile> searchFiles(String query, Pageable pageable) {
+    public Page<IndexedFile> searchFiles(String query, String rankingFormat, Pageable pageable) {
         if (query == null || query.trim().isEmpty()) {
             return Page.empty(pageable);
         }
@@ -41,8 +41,8 @@ public class SearchService {
         }
 
         List<IndexedFile> sortedFiles = dbResults.getContent().stream()
-                .peek(file -> file.setScore(rankingService.computeRankByReport(file)))  // Call the instance method
-                .sorted(Comparator.comparingDouble(rankingService::computeRankByReport).reversed())  // Call the instance method
+                .peek(file -> file.setScore(rankingService.computeRankByReport(file, rankingFormat)))
+                .sorted(Comparator.comparingDouble(file -> rankingService.computeRankByReport((IndexedFile) file, rankingFormat)).reversed())
                 .toList();
 
         int start = (int) pageable.getOffset();

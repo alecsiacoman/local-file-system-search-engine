@@ -115,6 +115,13 @@
 <h1>Search Files</h1>
 <form action="/search" method="get">
     <input type="text" name="query" placeholder="Enter keyword" id="searchInput" required>
+
+    <label for="rankingFormat">Ranking Format:</label>
+    <select id="rankingFormat" name="rankingFormat">
+        <option value="average">Average</option>
+        <option value="last_access">Last Access</option>
+        <option value="shorter_path">Shorter Path</option>
+    </select>
 </form>
 
 <h2>Results:</h2>
@@ -133,20 +140,24 @@
 </div>
 
 <script>
-    $(document).ready(function() {
-        $('#searchInput').on('input', function() {
+    $(document).ready(function () {
+        $('#searchInput').on('input', function () {
             const query = $(this).val();
+            const rankingFormat = $('#rankingFormat').val();
             if (query.trim() !== "") {
                 $.ajax({
                     url: '/search/ajax',
                     type: 'GET',
-                    data: { query: query },
-                    success: function(data) {
+                    data: {
+                        query: query,
+                        rankingFormat: rankingFormat
+                    },
+                    success: function (data) {
                         console.log('Search Results:', data);
                         $('#searchResults').empty();
 
                         if (data.files && data.files.length > 0) {
-                            data.files.forEach(function(file) {
+                            data.files.forEach(function (file) {
                                 $('#searchResults').append(`
                                 <li>
                                     <strong>${file.fileName}</strong> -
@@ -160,7 +171,7 @@
                             $('#searchResults').append('<li>No files found</li>');
                         }
                     },
-                    error: function(error) {
+                    error: function (error) {
                         console.log('Error:', error);
                     }
                 });
