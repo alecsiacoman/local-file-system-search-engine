@@ -1,6 +1,7 @@
 package local_search_engine.seeker.processor;
 
 import local_search_engine.seeker.model.IndexedFile;
+import local_search_engine.seeker.report.IndexReport;
 import local_search_engine.seeker.repository.FileRepository;
 import local_search_engine.seeker.service.ParserService;
 import lombok.extern.slf4j.Slf4j;
@@ -21,7 +22,7 @@ public class FileProcessor {
     @Autowired
     private FileRepository fileRepository;
 
-    public void processFiles(List<Path> files) {
+    public void processFiles(List<Path> files, IndexReport report) {
         for (Path file : files) {
             if (!Files.isReadable(file)) continue;
 
@@ -30,8 +31,14 @@ public class FileProcessor {
                 if (!fileAlreadyExists(indexedFile)) {
                     fileRepository.save(indexedFile);
                 }
+                if (report != null) {
+                    report.fileIndexed();
+                }
             } catch (Exception e) {
                 log.error("Error processing file {}: {}", file, e.getMessage());
+                if(report != null) {
+                    report.fileFailed(file.getFileName().toString(), e);
+                }
             }
         }
     }

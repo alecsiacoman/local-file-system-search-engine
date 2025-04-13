@@ -25,7 +25,7 @@ public class SearchService {
     @Autowired
     private RankingService rankingService;
 
-    private List<SearchObserver> observers = new ArrayList<>();
+    private final List<SearchObserver> observers = new ArrayList<>();
 
     public void addObserver(SearchObserver observer) {
         observers.add(observer);

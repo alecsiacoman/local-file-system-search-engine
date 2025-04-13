@@ -7,7 +7,10 @@ import java.util.concurrent.*;
 import java.util.stream.Stream;
 
 import local_search_engine.seeker.processor.FileProcessor;
+import local_search_engine.seeker.report.IndexReport;
+import local_search_engine.seeker.report.ReportWriterFactory;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -19,6 +22,9 @@ public class CrawlerService {
     private final ExecutorService executor = Executors.newFixedThreadPool(THREAD_POOL_SIZE);
     private final FileProcessor fileProcessor;
 
+    @Autowired
+    private ReportWriterFactory reportWriterFactory;
+
     public CrawlerService(FileProcessor fileProcessor) {
         this.fileProcessor = fileProcessor;
     }
@@ -26,46 +32,49 @@ public class CrawlerService {
     public void initialCrawl(String directoryPath) {
         log.info("Starting initial crawl for directory: {}", directoryPath);
         List<Path> fileBatch = new ArrayList<>();
+        IndexReport report = new IndexReport();
+        List<Future<?>> futures = new ArrayList<>();
 
         try (Stream<Path> paths = Files.walk(Paths.get(directoryPath))) {
             paths.forEach(file -> {
                 if (Files.isRegularFile(file)) {
                     fileBatch.add(file);
                     if (fileBatch.size() >= BATCH_SIZE) {
-                        processBatch(fileBatch);
+                        futures.add(processBatch(fileBatch, report));
                         fileBatch.clear();
                     }
                 }
             });
 
             if (!fileBatch.isEmpty()) {
-                processBatch(fileBatch);
+                futures.add(processBatch(fileBatch, report));
+            }
+
+            for (Future<?> future : futures) {
+                try {
+                    future.get();
+                } catch (InterruptedException | ExecutionException e) {
+                    log.error("Error waiting for task: {}", e.getMessage());
+                }
             }
 
         } catch (IOException e) {
             log.error("Error during crawling: {}", e.getMessage());
         }
+
         log.info("Initial crawl finished.");
-       // shutdownExecutor();
+        report.end();
+        reportWriterFactory.getReportWriter().write(report, "report");
     }
 
-    private void processBatch(List<Path> batch) {
-        executor.submit(() -> fileProcessor.processFiles(batch));
-    }
-
-    private void shutdownExecutor() {
-        executor.shutdown();
-        try {
-            executor.awaitTermination(1, TimeUnit.HOURS);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
+    private Future<?> processBatch(List<Path> batch, IndexReport report) {
+        return executor.submit(() -> fileProcessor.processFiles(batch, report));
     }
 
     public void indexFile(Path file) {
         executor.submit(() -> {
             List<Path> singleFileList = Collections.singletonList(file);
-            fileProcessor.processFiles(singleFileList);
+            fileProcessor.processFiles(singleFileList, null);
         });
     }
 }
