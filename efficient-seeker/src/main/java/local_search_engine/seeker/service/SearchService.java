@@ -45,17 +45,19 @@ public class SearchService {
         }
 
         QueryCriteria queryCriteria = new QueryCriteria(query);
-        Page<IndexedFile> dbResults;
+        List<IndexedFile> allResults = new ArrayList<>();
 
         if (queryCriteria.content != null) {
-            dbResults = fileRepository.searchByContent(queryCriteria.content, Pageable.unpaged());
-        } else if (queryCriteria.path != null) {
-            dbResults = fileRepository.searchByPath(queryCriteria.path, Pageable.unpaged());
-        } else {
-            dbResults = fileRepository.searchEverywhere(query, Pageable.unpaged());
+            allResults.addAll(fileRepository.searchByContent(queryCriteria.content, Pageable.unpaged()).getContent());
+        }
+        if (queryCriteria.path != null) {
+            allResults.addAll(fileRepository.searchByPath(queryCriteria.path, Pageable.unpaged()).getContent());
+        }
+        if (queryCriteria.content == null && queryCriteria.path == null) {
+            allResults.addAll(fileRepository.searchEverywhere(query, Pageable.unpaged()).getContent());
         }
 
-        List<IndexedFile> sortedFiles = dbResults.getContent().stream()
+        List<IndexedFile> sortedFiles = allResults.stream()
                 .peek(file -> file.setScore(rankingService.computeRankByReport(file, rankingFormat)))
                 .sorted(Comparator.comparingDouble(file -> rankingService.computeRankByReport((IndexedFile) file, rankingFormat)).reversed())
                 .toList();
