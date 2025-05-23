@@ -1,11 +1,11 @@
 package local_search_engine.seeker.controller;
 
-import local_search_engine.seeker.model.IndexedFile;
 import local_search_engine.seeker.model.SearchResponse;
+import local_search_engine.seeker.service.ProxySearchService;
 import local_search_engine.seeker.service.SearchHistory;
 import local_search_engine.seeker.service.SearchService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
+import local_search_engine.seeker.service.StandardSearchService;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
@@ -21,10 +21,11 @@ public class SearchController {
     private final SearchService searchService;
     private final SearchHistory searchHistory;
 
-    public SearchController(SearchService searchService, SearchHistory searchHistory) {
-        this.searchService = searchService;
+    public SearchController(@Qualifier("proxySearchService") ProxySearchService proxySearchService, StandardSearchService standardSearchService, SearchHistory searchHistory) {
+        this.searchService = proxySearchService;
         this.searchHistory = searchHistory;
-        this.searchService.addObserver(searchHistory);
+
+        standardSearchService.addObserver(searchHistory);
     }
 
     @GetMapping("/")
