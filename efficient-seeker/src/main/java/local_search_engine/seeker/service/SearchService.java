@@ -2,8 +2,11 @@ package local_search_engine.seeker.service;
 
 import local_search_engine.seeker.model.IndexedFile;
 import local_search_engine.seeker.model.QueryCriteria;
+import local_search_engine.seeker.model.SearchResponse;
 import local_search_engine.seeker.observer.SearchObserver;
 import local_search_engine.seeker.repository.FileRepository;
+import local_search_engine.seeker.widget.Widget;
+import local_search_engine.seeker.widget.WidgetResolver;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -11,10 +14,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 
 @Service
 @Slf4j
@@ -24,6 +24,9 @@ public class SearchService {
 
     @Autowired
     private RankingService rankingService;
+
+    @Autowired
+    private WidgetResolver widgetResolver;
 
     private final List<SearchObserver> observers = new ArrayList<>();
 
@@ -39,9 +42,9 @@ public class SearchService {
     }
 
 
-    public Page<IndexedFile> searchFiles(String query, String rankingFormat, Pageable pageable) {
+    public SearchResponse searchFiles(String query, String rankingFormat, Pageable pageable) {
         if (query == null || query.trim().isEmpty()) {
-            return Page.empty(pageable);
+            return new SearchResponse(null, 0, 0, null);
         }
 
         QueryCriteria queryCriteria = new QueryCriteria(query);
@@ -66,8 +69,11 @@ public class SearchService {
 
         int start = (int) pageable.getOffset();
         int end = Math.min(start + pageable.getPageSize(), sortedFiles.size());
+        int totalPages = (int) Math.ceil((double) sortedFiles.size() / pageable.getPageSize());
         List<IndexedFile> pageContent = (start > end) ? Collections.emptyList() : sortedFiles.subList(start, end);
 
-        return new PageImpl<>(pageContent, pageable, sortedFiles.size());
+        Optional<Widget> widgetOptional = widgetResolver.resolveWidget(query);
+
+        return new SearchResponse(pageContent, totalPages, pageable.getPageNumber(), widgetOptional);
     }
 }

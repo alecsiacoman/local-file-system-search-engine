@@ -1,6 +1,5 @@
 package local_search_engine.seeker.report;
 
-
 import lombok.Data;
 
 import java.time.Duration;

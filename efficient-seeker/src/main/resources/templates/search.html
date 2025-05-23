@@ -4,7 +4,6 @@
     <title>Search Engine for Local File System</title>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <style>
         body {
             font-family: 'Roboto', sans-serif;
@@ -164,10 +163,12 @@
     </select>
 </form>
 
-<h2>Results:</h2>
-<ul id="searchResults">
+<div th:if="${widget != null}" class="container" style="margin-top: 40px;">
+    <h2 th:text="${widget.name}"></h2>
+</div>
 
-</ul>
+<h2>Results:</h2>
+<ul id="searchResults"></ul>
 
 <h3>Suggested Queries:</h3>
 <div class="suggestions">
@@ -200,6 +201,13 @@
                         rankingFormat: rankingFormat
                     },
                     success: function (data) {
+                        if (data.widget) {
+                            $('#searchResults').append(`
+                                <li>
+                                    <strong>Widget:</strong> ${data.widget.image}<br/>
+                                </li>
+                            `);
+                        }
                         console.log('Search Results:', data);
                         $('#searchResults').empty();
 

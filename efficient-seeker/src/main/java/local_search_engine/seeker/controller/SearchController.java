@@ -1,6 +1,7 @@
 package local_search_engine.seeker.controller;
 
 import local_search_engine.seeker.model.IndexedFile;
+import local_search_engine.seeker.model.SearchResponse;
 import local_search_engine.seeker.service.SearchHistory;
 import local_search_engine.seeker.service.SearchService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,14 +39,14 @@ public class SearchController {
                              @RequestParam(defaultValue = "average") String rankingFormat,
                              Model model) {
         Pageable pageable = PageRequest.of(page, size);
-        Page<IndexedFile> results = searchService.searchFiles(query, rankingFormat, pageable);
+        SearchResponse response = searchService.searchFiles(query, rankingFormat, pageable);
 
-        model.addAttribute("files", results.getContent());
-        model.addAttribute("totalPages", results.getTotalPages());
-        model.addAttribute("currentPage", page);
+        model.addAttribute("files", response.results());
+        model.addAttribute("totalPages", response.totalPages());
+        model.addAttribute("currentPage", response.currentPage());
         model.addAttribute("query", query);
-
         model.addAttribute("suggestions", searchHistory.suggestQueries());
+        model.addAttribute("widget", response.widgetOptional().orElse(null));
 
         return "search";
     }
@@ -57,12 +58,13 @@ public class SearchController {
                                           @RequestParam(defaultValue = "10") int size,
                                           @RequestParam(defaultValue = "average") String rankingFormat) {
         Pageable pageable = PageRequest.of(page, size);
-        Page<IndexedFile> results = searchService.searchFiles(query, rankingFormat, pageable);
+        SearchResponse searchResponse = searchService.searchFiles(query, rankingFormat, pageable);
 
         Map<String, Object> response = new HashMap<>();
-        response.put("files", results.getContent());
-        response.put("totalPages", results.getTotalPages());
+        response.put("files", searchResponse.results());
+        response.put("totalPages", searchResponse.totalPages());
         response.put("currentPage", page);
+        searchResponse.widgetOptional().ifPresent(widget -> response.put("widget", widget));
 
         return response;
     }

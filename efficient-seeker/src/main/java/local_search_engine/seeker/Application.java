@@ -21,8 +21,8 @@ public class Application {
 	@Autowired
 	private FileWatcherService fileWatcherService;
 
-	//private static final Path DIRECTORY_TO_WATCH = Paths.get("D:/Facultate/AN3/An3Sem2");
-	private static final Path DIRECTORY_TO_WATCH = Paths.get("C:/Users/coman/Desktop/search-engine-test");
+	private static final Path DIRECTORY_TO_WATCH = Paths.get("D:/Facultate/AN3/An3Sem2");
+	//private static final Path DIRECTORY_TO_WATCH = Paths.get("C:/Users/coman/Desktop/search-engine-test");
 
 	public static void main(String[] args) {
 		SpringApplication.run(Application.class, args);
