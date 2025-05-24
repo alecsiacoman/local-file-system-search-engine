@@ -6,7 +6,7 @@ import local_search_engine.seeker.model.SearchResponse;
 import local_search_engine.seeker.observer.SearchObserver;
 import local_search_engine.seeker.repository.FileRepository;
 import local_search_engine.seeker.widget.Widget;
-import local_search_engine.seeker.widget.WidgetResolver;
+import local_search_engine.seeker.widget.WidgetFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
@@ -25,7 +25,7 @@ public class StandardSearchService implements SearchService{
     private RankingService rankingService;
 
     @Autowired
-    private WidgetResolver widgetResolver;
+    private WidgetFactory widgetFactory;
 
     private final List<SearchObserver> observers = new ArrayList<>();
 
@@ -70,7 +70,8 @@ public class StandardSearchService implements SearchService{
         int totalPages = (int) Math.ceil((double) sortedFiles.size() / pageable.getPageSize());
         List<IndexedFile> pageContent = (start > end) ? Collections.emptyList() : sortedFiles.subList(start, end);
 
-        Optional<Widget> widgetOptional = widgetResolver.resolveWidget(query);
+        List<Widget> widgets = widgetFactory.resolveAll(query, sortedFiles);
+        Optional<Widget> widgetOptional = widgets.isEmpty() ? Optional.empty() : Optional.of(widgets.get(0));
 
         Map<String, Long> fileTypeCount = getTop3Summary(
                 sortedFiles.stream().collect(Collectors.groupingBy(IndexedFile::getExtension, Collectors.counting()))

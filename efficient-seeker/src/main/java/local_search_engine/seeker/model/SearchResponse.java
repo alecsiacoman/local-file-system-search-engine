@@ -10,7 +10,7 @@ public record SearchResponse(
         List<IndexedFile> results,
         int totalPages,
         int currentPage,
-        Optional<Widget> widgetOptional,
+        Optional<Widget> widget,
         Map<String, Long> fileTypeCount,
         Map<Integer, Long> modifiedYearCount,
         Map<String, Long> languageCount

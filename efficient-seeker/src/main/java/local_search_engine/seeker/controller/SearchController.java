@@ -54,7 +54,7 @@ public class SearchController {
         model.addAttribute("currentPage", response.currentPage());
         model.addAttribute("query", query);
         model.addAttribute("suggestions", searchHistory.suggestQueries());
-        model.addAttribute("widget", response.widgetOptional().orElse(null));
+        model.addAttribute("widget", response.widget());
         if (isCorrected) {
             model.addAttribute("correctedQuery", correctedQuery);
         }
@@ -82,7 +82,7 @@ public class SearchController {
         response.put("files", searchResponse.results());
         response.put("totalPages", searchResponse.totalPages());
         response.put("currentPage", page);
-        searchResponse.widgetOptional().ifPresent(widget -> response.put("widget", widget));
+        response.put("widget", searchResponse.widget());
         if (isCorrected) {
             response.put("correctedQuery", correctedQuery);
         }
