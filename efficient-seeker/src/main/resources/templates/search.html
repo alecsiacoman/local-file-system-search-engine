@@ -163,6 +163,12 @@
     </select>
 </form>
 
+<div th:if="${correctedQuery}">
+    <p>Did you mean:
+        <a th:href="@{'/search'(query=${correctedQuery})}" th:text="${correctedQuery}"></a>?
+    </p>
+</div>
+
 <div th:if="${widget != null}" class="container" style="margin-top: 40px;">
     <h2 th:text="${widget.name}"></h2>
 </div>
