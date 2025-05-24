@@ -12,6 +12,6 @@ public record SearchResponse(
         int currentPage,
         Optional<Widget> widgetOptional,
         Map<String, Long> fileTypeCount,
-        Map<String, Long> modifiedYearCount,
+        Map<Integer, Long> modifiedYearCount,
         Map<String, Long> languageCount
 ) {}

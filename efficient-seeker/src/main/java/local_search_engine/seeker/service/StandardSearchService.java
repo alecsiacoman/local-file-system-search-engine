@@ -72,15 +72,30 @@ public class StandardSearchService implements SearchService{
 
         Optional<Widget> widgetOptional = widgetResolver.resolveWidget(query);
 
-        Map<String, Long> fileTypeCount = sortedFiles.stream()
-                .collect(Collectors.groupingBy(IndexedFile::getExtension, Collectors.counting()));
-
-        Map<String, Long> modifiedYearCount = sortedFiles.stream()
-                .collect(Collectors.groupingBy(IndexedFile::getLastModified, Collectors.counting()));
-
-        Map<String, Long> languageCount = sortedFiles.stream()
-                .collect(Collectors.groupingBy(IndexedFile::getLanguage, Collectors.counting()));
+        Map<String, Long> fileTypeCount = getTop3Summary(
+                sortedFiles.stream().collect(Collectors.groupingBy(IndexedFile::getExtension, Collectors.counting()))
+        );
+        Map<Integer, Long> modifiedYearCount = getTop3Summary(
+                sortedFiles.stream().collect(Collectors.groupingBy(IndexedFile::getYear, Collectors.counting()))
+        );
+        Map<String, Long> languageCount = getTop3Summary(
+                sortedFiles.stream().collect(Collectors.groupingBy(IndexedFile::getLanguage, Collectors.counting()))
+        );
 
         return new SearchResponse(pageContent, totalPages, pageable.getPageNumber(), widgetOptional, fileTypeCount, modifiedYearCount, languageCount);
     }
+
+    private <K> Map<K, Long> getTop3Summary(Map<K, Long> fullSummary) {
+        return fullSummary.entrySet().stream()
+                .filter(entry -> !entry.getKey().equals("Unknown"))
+                .sorted(Map.Entry.<K, Long>comparingByValue(Comparator.reverseOrder()))
+                .limit(3)
+                .collect(Collectors.toMap(
+                        Map.Entry::getKey,
+                        Map.Entry::getValue,
+                        (e1, e2) -> e1,
+                        LinkedHashMap::new
+                ));
+    }
+
 }

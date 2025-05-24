@@ -10,6 +10,10 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
 
 @Service
 @RequiredArgsConstructor
@@ -46,5 +50,10 @@ public class ParserService {
         if (fileName.endsWith(".ts")) return "TypeScript";
 
         return "Unknown";
+    }
+    public int extractYear(BasicFileAttributes attr) {
+        Instant instant = attr.lastModifiedTime().toInstant();
+        LocalDate date = instant.atZone(ZoneId.systemDefault()).toLocalDate();
+        return date.getYear();
     }
 }

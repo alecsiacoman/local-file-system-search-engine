@@ -36,5 +36,6 @@ public class IndexedFile {
 
     private double score;
     private String language;
+    private int year;
 }
 

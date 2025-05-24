@@ -52,6 +52,7 @@ public class FileProcessor {
         BasicFileAttributes attr = Files.readAttributes(file, BasicFileAttributes.class);
         String content = parserService.extractContent(file);
         String language = parserService.detectLanguage(file);
+        int year = parserService.extractYear(attr);
 
         IndexedFile indexedFile = new IndexedFile();
         indexedFile.setFileName(file.getFileName().toString());
@@ -62,6 +63,7 @@ public class FileProcessor {
         indexedFile.setContent(content);
         indexedFile.setMetadata("{\"owner\": \"" + Files.getOwner(file).toString() + "\"}");
         indexedFile.setLanguage(language);
+        indexedFile.setYear(year);
         return indexedFile;
     }
 
