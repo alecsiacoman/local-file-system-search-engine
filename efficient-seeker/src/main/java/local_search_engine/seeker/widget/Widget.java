@@ -6,5 +6,5 @@ import lombok.Getter;
 @AllArgsConstructor
 @Getter
 public class Widget {
-    private String name;
+  private String name;
 }

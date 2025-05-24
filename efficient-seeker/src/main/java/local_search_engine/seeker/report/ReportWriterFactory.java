@@ -6,13 +6,13 @@ import org.springframework.stereotype.Component;
 @Component
 public class ReportWriterFactory {
 
-    @Value("${report.format}")
-    private String format;
+  @Value("${report.format}")
+  private String format;
 
-    public ReportWriter getReportWriter() {
-        return switch (format.toLowerCase()) {
-            case "json" -> new JsonReportWriter();
-            default -> new TextReportWriter();
-        };
-    }
+  public ReportWriter getReportWriter() {
+    return switch (format.toLowerCase()) {
+      case "json" -> new JsonReportWriter();
+      default -> new TextReportWriter();
+    };
+  }
 }

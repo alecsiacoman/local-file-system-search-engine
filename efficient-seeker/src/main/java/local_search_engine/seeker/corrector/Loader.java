@@ -10,18 +10,18 @@ import java.util.regex.Pattern;
 
 public class Loader {
 
-    public static Map<String, Integer> load(Path filePath) throws IOException {
-        String text = Files.readString(filePath).toLowerCase();
+  public static Map<String, Integer> load(Path filePath) throws IOException {
+    String text = Files.readString(filePath).toLowerCase();
 
-        Pattern wordPattern = Pattern.compile("[a-z]+");
-        Matcher matcher = wordPattern.matcher(text);
+    Pattern wordPattern = Pattern.compile("[a-z]+");
+    Matcher matcher = wordPattern.matcher(text);
 
-        Map<String, Integer> frequencyMap = new HashMap<>();
-        while (matcher.find()) {
-            String word = matcher.group();
-            frequencyMap.put(word, frequencyMap.getOrDefault(word, 0) + 1);
-        }
-
-        return frequencyMap;
+    Map<String, Integer> frequencyMap = new HashMap<>();
+    while (matcher.find()) {
+      String word = matcher.group();
+      frequencyMap.put(word, frequencyMap.getOrDefault(word, 0) + 1);
     }
+
+    return frequencyMap;
+  }
 }

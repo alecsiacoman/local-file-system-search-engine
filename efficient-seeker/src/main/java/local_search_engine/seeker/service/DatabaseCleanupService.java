@@ -9,18 +9,16 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class DatabaseCleanupService implements DisposableBean {
 
-    @Autowired
-    private FileRepository fileRepository;
+  @Autowired private FileRepository fileRepository;
 
-    @Override
-    @Transactional
-    public void destroy() {
-        try {
-            fileRepository.deleteAll();
-            System.out.println("Database cleared.");
-        } catch (Exception e) {
-            System.err.println("Error while clearing the database: " + e.getMessage());
-        }
+  @Override
+  @Transactional
+  public void destroy() {
+    try {
+      fileRepository.deleteAll();
+      System.out.println("Database cleared.");
+    } catch (Exception e) {
+      System.err.println("Error while clearing the database: " + e.getMessage());
     }
+  }
 }
-

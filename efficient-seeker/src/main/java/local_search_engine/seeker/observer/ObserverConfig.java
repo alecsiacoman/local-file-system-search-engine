@@ -9,14 +9,12 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class ObserverConfig {
 
-    @Autowired
-    private StandardSearchService standardSearchService;
+  @Autowired private StandardSearchService standardSearchService;
 
-    @Autowired
-    private SearchHistory searchHistory;
+  @Autowired private SearchHistory searchHistory;
 
-    @PostConstruct
-    public void registerObservers() {
-        standardSearchService.addObserver(searchHistory);
-    }
+  @PostConstruct
+  public void registerObservers() {
+    standardSearchService.addObserver(searchHistory);
+  }
 }

@@ -3,20 +3,16 @@ package local_search_engine.seeker.corrector;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
-import java.nio.file.Path;
-import java.util.Map;
-
 @Service
 public class SpellingCorrectorService {
-    private SpellingCorrectorStrategy correctionStrategy;
+  private SpellingCorrectorStrategy correctionStrategy;
 
-    @Autowired
-    public void SpellingCorrectorService(SpellingCorrectorStrategy spellingCorrectorStrategy) {
-        this.correctionStrategy = spellingCorrectorStrategy;
-    }
+  @Autowired
+  public void SpellingCorrectorService(SpellingCorrectorStrategy spellingCorrectorStrategy) {
+    this.correctionStrategy = spellingCorrectorStrategy;
+  }
 
-    public String correctQuery(String query) {
-        return correctionStrategy.correct(query);
-    }
+  public String correctQuery(String query) {
+    return correctionStrategy.correct(query);
+  }
 }

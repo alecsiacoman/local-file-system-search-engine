@@ -1,9 +1,8 @@
 package local_search_engine.seeker.observer;
 
+import java.util.List;
 import local_search_engine.seeker.model.IndexedFile;
 
-import java.util.List;
-
 public interface SearchObserver {
-    void onSearch(String query, List<IndexedFile> searchResults);
+  void onSearch(String query, List<IndexedFile> searchResults);
 }
