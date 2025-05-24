@@ -13,6 +13,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service("standardSearchService")
 @Slf4j
@@ -41,7 +42,7 @@ public class StandardSearchService implements SearchService{
     @Override
     public SearchResponse searchFiles(String query, String rankingFormat, Pageable pageable) {
         if (query == null || query.trim().isEmpty()) {
-            return new SearchResponse(null, 0, 0, null);
+            return new SearchResponse(null, 0, 0, null, null, null, null);
         }
 
         QueryCriteria queryCriteria = new QueryCriteria(query);
@@ -71,6 +72,15 @@ public class StandardSearchService implements SearchService{
 
         Optional<Widget> widgetOptional = widgetResolver.resolveWidget(query);
 
-        return new SearchResponse(pageContent, totalPages, pageable.getPageNumber(), widgetOptional);
+        Map<String, Long> fileTypeCount = sortedFiles.stream()
+                .collect(Collectors.groupingBy(IndexedFile::getExtension, Collectors.counting()));
+
+        Map<String, Long> modifiedYearCount = sortedFiles.stream()
+                .collect(Collectors.groupingBy(IndexedFile::getLastModified, Collectors.counting()));
+
+        Map<String, Long> languageCount = sortedFiles.stream()
+                .collect(Collectors.groupingBy(IndexedFile::getLanguage, Collectors.counting()));
+
+        return new SearchResponse(pageContent, totalPages, pageable.getPageNumber(), widgetOptional, fileTypeCount, modifiedYearCount, languageCount);
     }
 }

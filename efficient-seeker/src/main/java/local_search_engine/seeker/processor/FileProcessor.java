@@ -51,6 +51,7 @@ public class FileProcessor {
     public IndexedFile extractFileInfo(Path file) throws IOException {
         BasicFileAttributes attr = Files.readAttributes(file, BasicFileAttributes.class);
         String content = parserService.extractContent(file);
+        String language = parserService.detectLanguage(file);
 
         IndexedFile indexedFile = new IndexedFile();
         indexedFile.setFileName(file.getFileName().toString());
@@ -60,13 +61,14 @@ public class FileProcessor {
         indexedFile.setLastModified(attr.lastModifiedTime().toString());
         indexedFile.setContent(content);
         indexedFile.setMetadata("{\"owner\": \"" + Files.getOwner(file).toString() + "\"}");
+        indexedFile.setLanguage(language);
         return indexedFile;
     }
 
     public String getFileExtension(Path file) {
         String fileName = file.getFileName().toString();
         int lastDot = fileName.lastIndexOf(".");
-        return (lastDot == -1) ? "" : fileName.substring(lastDot + 1).toLowerCase();
+        return (lastDot == -1) ? "" : fileName.substring(lastDot + 1).toUpperCase();
     }
 }
 

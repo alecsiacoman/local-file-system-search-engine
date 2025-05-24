@@ -30,4 +30,21 @@ public class ParserService {
             return "";
         }
     }
+
+    public String detectLanguage(Path filePath) {
+        String fileName = filePath.getFileName().toString().toLowerCase();
+
+        if (fileName.endsWith(".java")) return "Java";
+        if (fileName.endsWith(".c")) return "C";
+        if (fileName.endsWith(".cpp")) return "C++";
+        if (fileName.endsWith(".py")) return "Python";
+        if (fileName.endsWith(".js")) return "JavaScript";
+        if (fileName.endsWith(".html") || fileName.endsWith(".htm")) return "HTML";
+        if (fileName.endsWith(".css")) return "CSS";
+        if (fileName.endsWith(".sh")) return "Shell";
+        if (fileName.endsWith(".rb")) return "Ruby";
+        if (fileName.endsWith(".ts")) return "TypeScript";
+
+        return "Unknown";
+    }
 }

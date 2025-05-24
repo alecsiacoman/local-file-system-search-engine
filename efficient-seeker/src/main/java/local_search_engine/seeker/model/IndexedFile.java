@@ -35,5 +35,6 @@ public class IndexedFile {
     private String metadata;
 
     private double score;
+    private String language;
 }
 

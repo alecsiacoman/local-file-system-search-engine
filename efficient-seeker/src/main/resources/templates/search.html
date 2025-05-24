@@ -176,6 +176,26 @@
 <h2>Results:</h2>
 <ul id="searchResults"></ul>
 
+<h3>Metadata Summary</h3>
+<h4>File Types:</h4>
+<ul>
+    <li th:each="entry : ${fileTypeCount}">
+        <span th:text="${entry.key} + ' (' + ${entry.value} + ')'"></span>
+    </li>
+</ul>
+<h4>Modified Years:</h4>
+<ul>
+    <li th:each="entry : ${modifiedYearCount}">
+        <span th:text="${entry.key} + ' (' + ${entry.value} + ')'"></span>
+    </li>
+</ul>
+<h4>Languages:</h4>
+<ul>
+    <li th:each="entry : ${languageCount}">
+        <span th:text="${entry.key} + ' (' + ${entry.value}  + ')'"></span>
+    </li>
+</ul>
+
 <h3>Suggested Queries:</h3>
 <div class="suggestions">
     <ul>

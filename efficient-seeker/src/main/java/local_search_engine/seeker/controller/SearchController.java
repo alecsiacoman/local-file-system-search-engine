@@ -58,6 +58,9 @@ public class SearchController {
         if (isCorrected) {
             model.addAttribute("correctedQuery", correctedQuery);
         }
+        model.addAttribute("fileTypeCount", response.fileTypeCount());
+        model.addAttribute("modifiedYearCount", response.modifiedYearCount());
+        model.addAttribute("languageCount", response.languageCount());
 
         return "search";
     }
