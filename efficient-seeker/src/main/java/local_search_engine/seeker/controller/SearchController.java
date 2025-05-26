@@ -38,36 +38,6 @@ public class SearchController {
     return "search";
   }
 
-  @GetMapping("/search")
-  public String searchPage(
-      @RequestParam("query") String query,
-      @RequestParam(defaultValue = "0") int page,
-      @RequestParam(defaultValue = "10") int size,
-      @RequestParam(defaultValue = "average") String rankingFormat,
-      Model model) {
-    Pageable pageable = PageRequest.of(page, size);
-
-    String correctedQuery = spellingCorrectorService.correctQuery(query);
-    boolean isCorrected = !correctedQuery.equals(query);
-
-    SearchResponse response = searchService.searchFiles(correctedQuery, rankingFormat, pageable);
-
-    model.addAttribute("files", response.results());
-    model.addAttribute("totalPages", response.totalPages());
-    model.addAttribute("currentPage", response.currentPage());
-    model.addAttribute("query", query);
-    model.addAttribute("suggestions", searchHistory.suggestQueries());
-    model.addAttribute("widget", response.widget());
-    if (isCorrected) {
-      model.addAttribute("correctedQuery", correctedQuery);
-    }
-    model.addAttribute("fileTypeCount", response.fileTypeCount());
-    model.addAttribute("modifiedYearCount", response.modifiedYearCount());
-    model.addAttribute("languageCount", response.languageCount());
-
-    return "search";
-  }
-
   @GetMapping("/search/ajax")
   @ResponseBody
   public Map<String, Object> searchAjax(
@@ -87,10 +57,17 @@ public class SearchController {
     response.put("files", searchResponse.results());
     response.put("totalPages", searchResponse.totalPages());
     response.put("currentPage", page);
-    response.put("widget", searchResponse.widget());
+    if (searchResponse.widget().isPresent()) {
+      response.put("widget", searchResponse.widget().get());
+    }
+
     if (isCorrected) {
       response.put("correctedQuery", correctedQuery);
     }
+    response.put("suggestions", searchHistory.suggestQueries());
+    response.put("fileTypeCount", searchResponse.fileTypeCount());
+    response.put("modifiedYearCount", searchResponse.modifiedYearCount());
+    response.put("languageCount", searchResponse.languageCount());
 
     return response;
   }

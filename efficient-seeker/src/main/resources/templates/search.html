@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html>
 <head>
     <title>Search Engine for Local File System</title>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -152,8 +152,8 @@
 </head>
 <body>
 <h1>Search Files</h1>
-<form action="/search" method="get">
-    <input type="text" name="query" placeholder="Enter keyword" id="searchInput" required>
+<form id="searchForm" onsubmit="return false;">
+    <input type="text" name="query" placeholder="Enter keyword" id="searchBox" required>
 
     <label for="rankingFormat">Ranking Format:</label>
     <select id="rankingFormat" name="rankingFormat">
@@ -163,100 +163,117 @@
     </select>
 </form>
 
-<div th:if="${correctedQuery}">
-    <p>Did you mean:
-        <a th:href="@{'/search'(query=${correctedQuery})}" th:text="${correctedQuery}"></a>?
-    </p>
-</div>
+<div class="container">
+    <div id="correctedQueryContainer"></div>
+    <div id="widgetContainer"></div>
 
-<div th:if="${widget.present}" th:with="w=${widget.get()}">
-    <div class="card my-4 p-4 shadow-sm border-primary" style="font-size: 1.1rem;">
-        <div class="card-header bg-primary text-white">
-            <h5 class="mb-0" th:text="${w.name}">Widget Name</h5>
-        </div>
-</div>
+    <h2>Results:</h2>
+    <ul id="searchResults"></ul>
 
+    <h3>Suggested Queries:</h3>
+    <div class="suggestions">
+        <ul id="suggestionsList"></ul>
+    </div>
 
-<h2>Results:</h2>
-<ul id="searchResults"></ul>
+    <h3>Metadata Summary</h3>
+    <h4>File Types:</h4>
+    <p id="fileTypeCount"></p>
 
-<h3>Suggested Queries:</h3>
-<div class="suggestions">
-    <ul>
-        <li th:each="suggestion : ${suggestions}" th:text="${suggestion}"></li>
-    </ul>
-</div>
+    <h4>Modified Years:</h4>
+    <p id="modifiedYearCount"></p>
 
-<h3>Metadata Summary</h3>
-<h4>File Types:</h4>
-<p th:text="${@thymeleafHelper.mapToSummaryString(fileTypeCount)}"></p>
-
-<h4>Modified Years:</h4>
-<p th:text="${@thymeleafHelper.mapToSummaryString(modifiedYearCount)}"></p>
-
-<h4>Languages:</h4>
-<p th:text="${@thymeleafHelper.mapToSummaryString(languageCount)}"></p>
-
-<div class="pagination">
-    <span th:if="${currentPage > 0}">
-        <a th:href="@{|/search?query=${query}&page=${currentPage - 1}&size=10|}">Previous</a>
-    </span>
-
-    <span th:if="${currentPage < totalPages - 1}">
-        <a th:href="@{|/search?query=${query}&page=${currentPage + 1}&size=10|}">Next</a>
-    </span>
+    <h4>Languages:</h4>
+    <p id="languageCount"></p>
 </div>
 
 <script>
-    $(document).ready(function () {
-        $('#searchInput').on('input', function () {
-            const query = $(this).val();
-            const rankingFormat = $('#rankingFormat').val();
-            if (query.trim() !== "") {
-                $.ajax({
-                    url: '/search/ajax',
-                    type: 'GET',
-                    data: {
-                        query: query,
-                        rankingFormat: rankingFormat
-                    },
-                    success: function (data) {
-                        if (data.widget) {
-                            $('#searchResults').append(`
-                                <li>
-                                    <strong>Widget:</strong> ${data.widget.image}<br/>
-                                </li>
-                            `);
-                        }
-                        console.log('Search Results:', data);
-                        $('#searchResults').empty();
+    const searchBox = document.getElementById('searchBox');
+    const rankingFormatSelect = document.getElementById('rankingFormat');
+    const correctedQueryContainer = document.getElementById('correctedQueryContainer');
+    const widgetContainer = document.getElementById('widgetContainer');
+    const searchResults = document.getElementById('searchResults');
+    const suggestionsList = document.getElementById('suggestionsList');
+    const fileTypeCount = document.getElementById('fileTypeCount');
+    const modifiedYearCount = document.getElementById('modifiedYearCount');
+    const languageCount = document.getElementById('languageCount');
 
-                        if (data.files && data.files.length > 0) {
-                            data.files.forEach(function (file) {
-                                $('#searchResults').append(`
-                                <li>
-                                    <strong>${file.fileName}</strong> -
-                                    <span>${file.filePath}</span>
-                                     <p>Score: ${file.score}</p>
-                                    <p>${file.content.length > 100 ? file.content.substring(0, 100) + '...' : file.content}</p>
-                                </li>
-                            `);
-                            });
-                        } else {
-                            $('#searchResults').append('<li>No files found</li>');
-                        }
-                    },
-                    error: function (error) {
-                        console.log('Error:', error);
-                    }
+    let timeout = null;
+
+    function fetchAndRenderResults() {
+        const query = searchBox.value.trim();
+        const rankingFormat = rankingFormatSelect.value;
+
+        if (query.length === 0) {
+            correctedQueryContainer.innerHTML = '';
+            widgetContainer.innerHTML = '';
+            searchResults.innerHTML = '';
+            suggestionsList.innerHTML = '';
+            fileTypeCount.textContent = '';
+            modifiedYearCount.textContent = '';
+            languageCount.textContent = '';
+            return;
+        }
+
+        fetch(`/search/ajax?query=${encodeURIComponent(query)}&page=0&size=10&rankingFormat=${rankingFormat}`)
+            .then(response => response.json())
+            .then(data => {
+                correctedQueryContainer.innerHTML = '';
+                if (data.correctedQuery && data.correctedQuery !== query) {
+                    correctedQueryContainer.innerHTML =
+                        `Did you mean: <a href="#" onclick="document.getElementById('searchBox').value = '${data.correctedQuery}'; fetchAndRenderResults(); return false;">${data.correctedQuery}</a>?`;
+                }
+
+                widgetContainer.innerHTML = '';
+                if (data.widget) {
+                    widgetContainer.innerHTML = `
+                        <div class="card my-4 p-4 shadow-sm border-primary" style="font-size: 1.1rem;">
+                            <div class="card-header bg-primary text-white">
+                                <h5 class="mb-0">${data.widget.name}</h5>
+                            </div>
+                        </div>
+                    `;
+                }
+
+                searchResults.innerHTML = '';
+                if (data.files && data.files.length > 0) {
+                    data.files.forEach(file => {
+                        const li = document.createElement('li');
+                        li.innerHTML = `
+                        <strong>${file.fileName || file.name || 'Unnamed file'}</strong> -
+                        <span>${file.filePath || file.path || ''}</span>
+                        <p>Score: ${file.score !== undefined ? file.score.toFixed(2) : 'N/A'}</p>
+                        <p>${file.content ? (file.content.length > 100 ? file.content.substring(0, 100) + '...' : file.content) : ''}</p>
+                    `;
+                        searchResults.appendChild(li);
+                    });
+                } else {
+                    searchResults.innerHTML = '<li>No files found</li>';
+                }
+
+
+                suggestionsList.innerHTML = '';
+                (data.suggestions || []).forEach(suggestion => {
+                    const li = document.createElement('li');
+                    li.textContent = suggestion;
+                    suggestionsList.appendChild(li);
                 });
-            } else {
-                $('#searchResults').empty();
-            }
-        });
+
+                fileTypeCount.textContent = formatMap(data.fileTypeCount || {});
+                modifiedYearCount.textContent = formatMap(data.modifiedYearCount || {});
+                languageCount.textContent = formatMap(data.languageCount || {});
+            });
+    }
+
+    function formatMap(obj) {
+        return Object.entries(obj).map(([key, val]) => `${key}: ${val}`).join(', ');
+    }
+
+    searchBox.addEventListener('input', () => {
+        clearTimeout(timeout);
+        timeout = setTimeout(fetchAndRenderResults, 300);
     });
 
+    rankingFormatSelect.addEventListener('change', fetchAndRenderResults);
 </script>
-
 </body>
 </html>
